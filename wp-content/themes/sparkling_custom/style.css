@@ -1311,6 +1311,16 @@ p.logged-in-as {
   }
 }
 
+.container{
+  /*width: 720px;*/
+}
+
+#map-canvas { 
+  width: 720px;
+  height: 480px; 
+}
+
+
 /* =Elements when no javaScript is present
 ----------------------------------------------- */
 #submit,

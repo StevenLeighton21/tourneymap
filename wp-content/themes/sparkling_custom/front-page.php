@@ -5,14 +5,18 @@
     } elseif ( 'page' == get_option( 'show_on_front' ) ) {
 
 get_header(); ?>
-</div>
+
+
 <div id="content" class="site-content container">
 	<div id="primary" class="content-area col-sm-12 col-md-12">
+
 		<main id="main" class="site-main" role="main">
 			<div class="post-inner-content">
 
 				<?php while ( have_posts() ) : the_post(); ?>
-
+					<div class="banner">
+						<img src='<?php get_the_post_thumbnail() ?>'>
+					</div>
 					<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 						<div class="entry-content">
 							<?php the_content(); ?>
@@ -34,7 +38,7 @@ get_header(); ?>
 		</main><!-- #main -->
 	</div><!-- #primary -->
 
-  <?php get_sidebar( 'home' ); ?>
+  
 	
 <?php
 	get_footer();
