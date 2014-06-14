@@ -1320,6 +1320,10 @@ p.logged-in-as {
   height: 480px; 
 }
 
+#map-controls.container {
+  margin: 20px 0 auto;
+}
+
 
 /* =Elements when no javaScript is present
 ----------------------------------------------- */

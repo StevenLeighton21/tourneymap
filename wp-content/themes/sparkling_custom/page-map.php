@@ -15,43 +15,34 @@ get_header(); ?>
 
 	<div id="primary" class="content-area">
 		<main id="main" class="site-main" role="main">
+			  <div id="map-canvas"/>
+			  </div>
 
-<!-- 		<?php if ( have_posts() ) : ?>
+	<script type="text/javascript">
+		function centreMap(){
+			var address = document.getElementById("userPostCode").value;
+			var geocoder = new google.maps.Geocoder();
+			geocoder.geocode( { 'address': address}, function(results, status) {
+	      if (status == google.maps.GeocoderStatus.OK) {
+		        map.setCenter(results[0].geometry.location);
+		        map.setZoom(11);
+		        //var marker = new google.maps.Marker({
+	            //map: map,
+	            //position: results[0].geometry.location
+        //});
+      } else {
+        alert("Geocode was not successful for the following reason: " + status);
+      }
+    });
+		}
+	</script>
 
-			<?php /* Start the Loop */ ?>
-			<?php while ( have_posts() ) : the_post(); ?>
-
-				<?php
-					/* Include the Post-Format-specific template for the content.
-					 * If you want to override this in a child theme, then include a file
-					 * called content-___.php (where ___ is the Post Format name) and that will be used instead.
-					 */
-					// get_template_part( 'content', get_post_format() );
-				?>
-
-			<?php endwhile; ?> -->
-				<div class="container">
-			    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-				   
-				    <script type="text/javascript"
-				      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeUevYX8rOl_W_P9jxKZz7G9eiTqFdvj8">
-				    </script>
-				    <script type="text/javascript">
-				    
-				      function initialize() {
-				        var mapOptions = {
-				          center: new google.maps.LatLng(51.0, 0.0),
-				          zoom: 8
-				        };
-				        var map = new google.maps.Map(document.getElementById("map-canvas"),
-				            mapOptions);
-				      }
-				      google.maps.event.addDomListener(window, 'load', initialize);
-				    </script>
-
-				    <div id="map-canvas"/>
-				    </div>
-
+	<div class="container" id="map-controls">
+	<form id="map-controls">
+	<input type ="textarea" placeholder="Insert Postcode" id="userPostCode"/>
+	<input type="button" id="setMap" onclick="centreMap()" value="Centre Map"/>
+	</form>
+	</div>
 
 <!-- 				    var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
 var mapOptions = {
@@ -71,11 +62,11 @@ var marker = new google.maps.Marker({
 			<section id="events">
 				<div class="container">
 				<?php
+					$postData = array();
 				    $args = array(
 				      'post_type' => 'event',
 				    );
 				    $events = new WP_Query( $args );
-				    //var_dump($events);
 				    if( $events->have_posts() ) {
 						 while ( $events->have_posts() ) : $events->the_post(); 
 	
@@ -84,58 +75,73 @@ var marker = new google.maps.Marker({
 				          <div class='content'>
 				            <?php the_content();
 				             $postcode = get_post_meta( get_the_ID(), 'event_location_postcode', true );
-				             $latlng = geocode_pc($postcode);
-				             echo $postcode;
-				            // echo $latlng['latitude'];
-				             //echo $latlng['longitude'];
-				             // print_r($latlng);
+				             $lat = get_post_meta(get_the_ID(), 'event_location_lat', true);
+				             $lng = get_post_meta(get_the_ID(), 'event_location_lng', true);
+				             $locData = [
+				             	'postcode' => $postcode,
+				             	'lat' => $lat,
+				             	'lng' => $lng,
+				             	'id' => get_the_ID(),
+				             	//'title' => the_title()
+				             	];
+				             array_push($postData, $locData);
+				             echo "$postcode - ($lat) ($lng) ";
 				             ?>
-
-				             <script type="text/javascript" onLoad="addMarker()">
-
-								// var myLatlng = new google.maps.LatLng(<?php echo $latlng['latitude'];?> , <?php echo $latlng['longitude'];?>);
-								// //alert(myLatlng);
-								// // To add the marker to the map, use the 'map' property
-								// var marker = new google.maps.Marker({
-								//     position: myLatlng,
-								//     title:"Hello World!"
-								// });
-
-								// marker.setMap(map);
-
-								function addMarker(){
-								var myLatlng = new google.maps.LatLng(<?php echo $latlng['latitude'];?> , <?php echo $latlng['longitude'];?>);
-								//alert(myLatlng);
-								// To add the marker to the map, use the 'map' property
-								var marker = new google.maps.Marker({
-								    position: myLatlng,
-								    title:"Hello World!"
-								});
-								alert("bp 1");
-								marker.setMap(map);
-								alert("bp 2");
-								}
-							
-				             </script>
-				            <!--  <div id="evenloader" onLoad="addMarker()"/> -->
 				          </div>
 				        <?php endwhile;
-				      }
-				    
+				      }	    
 				    else {
-				      echo 'Oh ohm no events!';
+				      echo 'Sorry, no events were found!';
 				    }
-				  ?>
+				 	 ?>
   				</div>
 			</section>
 
 			<?php sparkling_paging_nav(); ?>
 
-		<?php else : ?>
+				<div class="container">
+			    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+				   
+				    <script type="text/javascript"  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeUevYX8rOl_W_P9jxKZz7G9eiTqFdvj8"></script>
+				    <script type="text/javascript">
+				    var map;
+				      function initialize() {
+				        var mapOptions = {
+				          center: new google.maps.LatLng(51.0, 0.0),
+				          zoom: 9
+				        };
+				          map = new google.maps.Map(document.getElementById("map-canvas"),
+				            mapOptions);
+				      
+				      
 
-			<?php get_template_part( 'content', 'none' ); ?>
+				      <?php foreach ($postData as $key => $value) { ?>
+				      	
 
-		<?php endif; ?>
+						
+						var myLatlng = new google.maps.LatLng(<?php echo $value['lng'];?> , <?php echo $value['lat'];?>);
+					
+						var marker = new google.maps.Marker({
+						    position: myLatlng,
+						    title: "HW",
+						    //map:map
+						});
+						//alert("bp 1");
+						marker.setMap(map);
+						//alert("bp 2");
+						
+
+						//var add = addMarker();
+
+						<?php } ?>
+					}
+					google.maps.event.addDomListener(window, 'load', initialize);
+
+
+		             </script>
+					
+				  
+				    </div>
 
 		</main><!-- #main -->
 	</div><!-- #primary -->

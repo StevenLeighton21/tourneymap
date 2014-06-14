@@ -345,6 +345,16 @@ function event_metaboxes() {
         'side',
         'high'
     );
+    add_meta_box(
+        'event_location_lat',
+        'event_location_lat_content',
+        'event'
+      );
+        add_meta_box(
+        'event_location_lng',
+        'event_location_lng_content',
+        'event'
+      );
 }
 
 function event_location_postcode_content( $post ) {
@@ -370,8 +380,14 @@ function event_location_postcode_save( $post_id ) {
     if ( !current_user_can( 'edit_post', $post_id ) )
     return;
   }
+  
   $event_location_postcode = $_POST['event_location_postcode'];
+  $ltlng = geocode_pc($event_location_postcode);
   update_post_meta( $post_id, 'event_location_postcode', $event_location_postcode );
+  update_post_meta( $post_id, 'event_location_lat', $ltlng['longitude'] );
+  update_post_meta( $post_id, 'event_location_lng', $ltlng['latitude'] );
+
+
 }
 
 function geocode_pc($string) {
